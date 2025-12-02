@@ -1,8 +1,3 @@
-"""
-Convolutional Transformer for EEG decoding with DSTFormer blocks
-层级混合架构：前半部分层使用双Mamba，后半部分层使用时间Mamba+空间Attention
-82.21% ± 11.82%,79.82%
-"""
 
 import argparse
 import os
@@ -731,7 +726,7 @@ class ClassificationHead(nn.Module):
             self.fc[5].update_dropout_rate(drop_rate * 0.6)
 
 
-class ConformerV3(nn.Module):
+class HiSAM(nn.Module):
     def __init__(self, emb_size=40, depth=6, n_classes=4, use_dstformer=True, 
                  hierarchical_ratio=0.5, reverse_order=True, use_hybrid_attention=True,
                  attention_window_size=16, **kwargs):
@@ -816,8 +811,7 @@ class ExP():
             self.criterion_cls = torch.nn.CrossEntropyLoss().cuda()
             print("Using standard CrossEntropyLoss")
 
-        # Use ConformerV3 with hierarchical architecture and enhanced attention
-        self.model = ConformerV3(
+        self.model = HiSAM(
             use_dstformer=True, 
             hierarchical_ratio=0.5,  # 50% Mamba blocks, 50% Hybrid blocks
             reverse_order=True,
@@ -1126,7 +1120,7 @@ def main():
     aver = 0
     
     # Create results directory
-    results_dir = "./results/conformer_v3_attention_optimization"
+    results_dir = ""
     os.makedirs(results_dir, exist_ok=True)
     
     # Create timestamp for file naming
@@ -1154,7 +1148,7 @@ def main():
     attention_window_size = 16  # 局部注意力窗口大小
     
     # Write headers
-    log_file.write(f"ConformerV3 with Attention Optimization - Training Log\n")
+    log_file.write(f"with Attention Optimization - Training Log\n")
     log_file.write(f"Label Smoothing Parameter: {label_smoothing}\n")
     log_file.write(f"Progressive Dropout: {'Enabled' if use_progressive_dropout else 'Disabled'}\n")
     log_file.write(f"Dropout Schedule: 0.5 → 0.7 (progressive)\n")
@@ -1182,7 +1176,7 @@ def main():
     log_file.write(f"Started at: {datetime.datetime.now()}\n")
     log_file.write("="*80 + "\n\n")
     
-    result_file.write(f"ConformerV3 with Attention Optimization - Results Summary\n")
+    result_file.write(f"with Attention Optimization - Results Summary\n")
     result_file.write(f"Label Smoothing Parameter: {label_smoothing}\n")
     result_file.write(f"Progressive Dropout: {'Enabled' if use_progressive_dropout else 'Disabled'}\n")
     result_file.write(f"Dropout Schedule: 0.5 → 0.7 (progressive)\n")
